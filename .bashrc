@@ -5,12 +5,15 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
+# don't put duplicate lines in the history. See bash(1) for more options
+# ... or force ignoredups and ignorespace
+HISTCONTROL=ignoredups:ignorespace
 
 # append to the history file, don't overwrite it
 shopt -s histappend
+
+# After each command, save and reload history - this is to keep history across multiplexed terminals
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=5000
@@ -54,22 +57,24 @@ if [ -n "$force_color_prompt" ]; then
 	color_prompt=
     fi
 fi
-
+#line_ending=$'\xf0\x9f\x92\xa1\xe2\x88\x85 ' #illuminull
+#line_ending=$'\xe2\x88\x85 ' #null
+line_ending="$"
 if [ "$color_prompt" = yes ]; then
-	PS1="\[$(tput bold)\]\[\\033[38;5;124m\]\t \[\\033[38;5;208m\]\u\[\\033[38;5;226m\]@\[\\033[38;5;34m\]\h \[\\033[38;5;27m\]\w \[\\033[38;5;56m\]"$'\xf0\x9f\x92\xa1\xe2\x88\x85 '"\[$(tput sgr0)\]\[\\033[38;5;7m\]\[\033[0m\] "
+	PS1="\[$(tput bold)\]\[\\033[38;5;124m\]\t \[\\033[38;5;208m\]\u\[\\033[38;5;226m\]@\[\\033[38;5;34m\]\h \[\\033[38;5;27m\]\w\[\\033[38;5;56m\]""\[$(tput sgr0)\]\[\033[0m\]"
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+#case "$TERM" in
+#xterm*|rxvt*)
+#    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+#    ;;
+#*)
+#    ;;
+#esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -121,3 +126,19 @@ bind "\C-l":"clear-screen"
 #set default editor to vim
 export VISUAL=vim
 export EDITOR=$VISUAL
+
+# Git-fu
+. ~/.git-completion.bash
+. ~/.git-prompt.sh
+# Options to .git-prompt.sh:
+GIT_PS1_SHOWDIRTYSTATE=1
+GIT_PS1_SHOWSTASHSTATE=1
+GIT_PS1_SHOWUNTRACKEDFILES=1
+GIT_PS1_SHOWUPSTREAM=git
+GIT_PS1_SHOWCOLORHINTS=1
+GIT_PS1_HIDE_IF_PWD_IGNORED=1
+GIT_PS1_DESCRIBE_STYLE=branch
+# This trims the "$" at the end of the default PS1 prompt
+#PS1=`echo $PS1 | sed 's/'$line_ending'//'`
+# This "enables" .git-prompt.sh, and adds back the "$" at the end
+PROMPT_COMMAND="__git_ps1 '$PS1' '$line_ending '"
