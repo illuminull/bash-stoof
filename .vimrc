@@ -3,6 +3,7 @@ set shiftwidth=3
 set autoindent
 syntax on
 
+
 function! CommandLineSubstitute()
 	let cl = getcmdline()
 	if exists('g:command_line_substitutes')
@@ -15,6 +16,7 @@ function! CommandLineSubstitute()
 	endif
 	return cl
 endfunction
+
 
 " This function reads search/replace pairs from a global variable you set
 " in your `.vimrc`.  That global variable looks something like this:
